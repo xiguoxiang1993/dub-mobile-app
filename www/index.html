@@ -10,7 +10,6 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
     }
 
     html, body {
@@ -33,8 +32,7 @@
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      z-index: 9999;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     .logo {
@@ -79,209 +77,109 @@
       padding: 0 40px;
       line-height: 1.6;
     }
-
-    .retry-btn {
-      margin-top: 20px;
-      padding: 12px 30px;
-      background: #667eea;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      font-family: inherit;
-    }
-
-    .retry-btn:active {
-      opacity: 0.8;
-    }
   </style>
 </head>
 <body>
   <div class="loading" id="loading">
     <div class="logo">D</div>
     <div class="spinner"></div>
-    <p class="loading-text">加载编辑器中...</p>
+    <p class="loading-text">等待打开...</p>
   </div>
   <iframe id="webview-container"></iframe>
 
-  <script type="module">
-    // 全局变量存储编辑器 URL
-    let editorUrlFromDeepLink = null;
+  <!-- Capacitor Core JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@capacitor/core@latest/dist/capacitor.js"></script>
 
-    // 从 URL 参数获取编辑器地址
-    function getEditorUrl() {
-      // 优先使用 Deep Link 传递的 URL
-      if (editorUrlFromDeepLink) {
-        console.log('使用 Deep Link URL:', editorUrlFromDeepLink);
-        return editorUrlFromDeepLink;
-      }
+  <script>
+    const iframe = document.getElementById('webview-container');
+    const loading = document.getElementById('loading');
 
-      const params = new URLSearchParams(window.location.search);
+    // 加载 URL
+    function loadUrl(url) {
+      console.log('加载 URL:', url);
 
-      // 支持多种参数名
-      const url = params.get('url') || params.get('editor') || params.get('path');
-
-      if (url) {
-        return decodeURIComponent(url);
-      }
-
-      // 支持从 hash 中获取
-      const hash = window.location.hash.slice(1);
-      if (hash) {
-        try {
-          const hashParams = new URLSearchParams(hash);
-          const hashUrl = hashParams.get('url');
-          if (hashUrl) {
-            return decodeURIComponent(hashUrl);
-          }
-        } catch (e) {
-          console.error('解析 hash 参数失败:', e);
-        }
-      }
-
-      // 没有传递 URL，显示提示
-      return null;
-    }
-
-    // 显示错误信息
-    function showError(message) {
-      const loading = document.getElementById('loading');
-      loading.innerHTML = `
-        <div class="logo">D</div>
-        <p class="error">${message}</p>
-        <button class="retry-btn" onclick="location.reload()">重新加载</button>
-      `;
-    }
-
-    // 加载编辑器
-    function loadEditor() {
-      const iframe = document.getElementById('webview-container');
-      const loading = document.getElementById('loading');
-      const editorUrl = getEditorUrl();
-
-      // 如果没有传递 URL，显示提示
-      if (!editorUrl) {
-        loading.innerHTML = `
-          <div class="logo">D</div>
-          <p class="error">请从 Web 页面点击链接打开编辑器</p>
-          <p style="color: #999; font-size: 14px; margin-top: 10px;">
-            示例：dubeditor://open?url=https://your-domain.com/editor
-          </p>
-        `;
-        return;
-      }
-
-      console.log('加载编辑器:', editorUrl);
-
-      // 显示加载状态
-      loading.innerHTML = `
-        <div class="logo">D</div>
-        <div class="spinner"></div>
-        <p class="loading-text">加载编辑器中...</p>
-      `;
-      loading.style.display = 'block';
-
-      // 设置超时
-      const timeout = setTimeout(() => {
-        showError('加载超时，请检查网络连接');
-      }, 30000);
+      loading.querySelector('.loading-text').textContent = '加载中...';
 
       iframe.onload = () => {
-        clearTimeout(timeout);
+        console.log('加载成功');
         loading.style.display = 'none';
         iframe.style.display = 'block';
-        console.log('编辑器加载成功');
       };
 
       iframe.onerror = () => {
-        clearTimeout(timeout);
-        showError('加载失败，请检查网络连接或编辑器地址是否正确');
-        console.error('编辑器加载失败');
+        console.error('加载失败');
+        loading.innerHTML = `
+          <div class="logo">D</div>
+          <p class="error">加载失败，请检查网络连接</p>
+        `;
       };
 
-      iframe.src = editorUrl;
+      iframe.src = url;
     }
 
-    // 监听 App URL 打开事件（Deep Link）
-    function setupDeepLink() {
-      // Capacitor App Plugin
-      if (window.Capacitor && window.Capacitor.Plugins.App) {
-        console.log('Capacitor App Plugin 已加载');
+    // 等待 Capacitor 加载
+    document.addEventListener('deviceready', () => {
+      console.log('Capacitor 已就绪');
 
-        window.Capacitor.Plugins.App.addListener('appUrlOpen', (event) => {
-          console.log('App URL Open 事件触发:', event.url);
+      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+        const App = window.Capacitor.Plugins.App;
 
-          // 解析 URL: dubeditor://open?url=xxx
+        // 监听 Deep Link
+        App.addListener('appUrlOpen', (data) => {
+          console.log('接收到 Deep Link:', data.url);
+
           try {
-            const url = new URL(event.url);
+            const url = new URL(data.url);
             const targetUrl = url.searchParams.get('url');
 
-            console.log('解析到的目标 URL:', targetUrl);
-
             if (targetUrl) {
-              const decodedUrl = decodeURIComponent(targetUrl);
-              console.log('解码后的 URL:', decodedUrl);
-
-              editorUrlFromDeepLink = decodedUrl;
-
-              // 重新加载编辑器
-              loadEditor();
-            } else {
-              console.error('未找到 url 参数');
+              loadUrl(decodeURIComponent(targetUrl));
             }
           } catch (e) {
-            console.error('解析 Deep Link 失败:', e);
+            console.error('解析失败:', e);
           }
         });
 
-        // 检查启动时的 URL（冷启动）
-        window.Capacitor.Plugins.App.getLaunchUrl().then(result => {
+        // 检查启动 URL
+        App.getLaunchUrl().then(result => {
           if (result && result.url) {
-            console.log('App 启动 URL:', result.url);
+            console.log('启动 URL:', result.url);
+
             try {
               const url = new URL(result.url);
               const targetUrl = url.searchParams.get('url');
+
               if (targetUrl) {
-                const decodedUrl = decodeURIComponent(targetUrl);
-                console.log('启动时的目标 URL:', decodedUrl);
-                editorUrlFromDeepLink = decodedUrl;
+                loadUrl(decodeURIComponent(targetUrl));
+              } else {
+                loading.innerHTML = `
+                  <div class="logo">D</div>
+                  <p class="error">请从 Web 页面点击链接打开</p>
+                `;
               }
             } catch (e) {
               console.error('解析启动 URL 失败:', e);
+              loading.innerHTML = `
+                <div class="logo">D</div>
+                <p class="error">请从 Web 页面点击链接打开</p>
+              `;
             }
+          } else {
+            loading.innerHTML = `
+              <div class="logo">D</div>
+              <p class="error">请从 Web 页面点击链接打开</p>
+            `;
           }
-        }).catch(err => {
-          console.error('获取启动 URL 失败:', err);
         });
-      } else {
-        console.warn('Capacitor App Plugin 未加载');
       }
-    }
+    }, false);
 
-    // 页面加载完成后执行
-    window.addEventListener('DOMContentLoaded', () => {
-      console.log('DOMContentLoaded 事件触发');
-      setupDeepLink();
-
-      // 延迟加载，等待 Capacitor 初始化
-      setTimeout(() => {
-        loadEditor();
-      }, 500);
-    });
-
-    // 监听网络状态变化
-    window.addEventListener('online', () => {
-      console.log('网络已连接');
-    });
-
-    window.addEventListener('offline', () => {
-      console.log('网络已断开');
-      showError('网络连接已断开，请检查网络设置');
-    });
+    // 如果 deviceready 没触发，使用 DOMContentLoaded
+    setTimeout(() => {
+      if (loading.style.display !== 'none') {
+        document.dispatchEvent(new Event('deviceready'));
+      }
+    }, 1000);
   </script>
-
-  <!-- Capacitor Core JS -->
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@capacitor/core@latest/dist/capacitor.js"></script>
 </body>
 </html>
