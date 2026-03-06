@@ -1,0 +1,45 @@
+# Android SDK 组件下载清单
+
+请帮忙下载以下三个文件（总共约 140MB）：
+
+## 文件 1: platform-tools
+- 下载地址：https://dl.google.com/android/repository/platform-tools-latest-windows.zip
+- 文件大小：约 10MB
+- 保存为：platform-tools.zip
+
+## 文件 2: build-tools
+- 下载地址：https://dl.google.com/android/repository/build-tools_r34-windows.zip
+- 文件大小：约 60MB
+- 保存为：build-tools.zip
+
+## 文件 3: android platform
+- 下载地址：https://dl.google.com/android/repository/platform-34_r03.zip
+- 文件大小：约 70MB
+- 保存为：platform.zip
+
+---
+
+下载完成后，将三个文件放到：
+D:\Android\sdk-downloads\
+
+然后运行项目继续构建。
+
+---
+
+## 备用下载方式
+
+如果上述链接无法访问，可以尝试：
+
+1. 使用迅雷/IDM 等下载工具
+2. 使用手机热点网络
+3. 在网络环境好的地方下载
+4. 请朋友帮忙下载后传给你
+
+## 或者使用百度网盘
+
+搜索关键词：
+- "Android SDK 34 离线包"
+- "Android build-tools 34"
+- "Android platform-tools"
+
+通常有开发者分享完整的离线包。

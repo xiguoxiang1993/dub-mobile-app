@@ -1,0 +1,26 @@
+{
+  "name": "dub-editor-mobile",
+  "version": "1.0.0",
+  "description": "Dub Editor Mobile App",
+  "main": "index.js",
+  "scripts": {
+    "android": "cap open android",
+    "ios": "cap open ios",
+    "sync": "cap sync",
+    "sync:android": "cap sync android",
+    "sync:ios": "cap sync ios",
+    "add:android": "cap add android",
+    "add:ios": "cap add ios",
+    "copy": "cap copy",
+    "update": "cap update"
+  },
+  "keywords": ["capacitor", "mobile", "webview"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@capacitor/android": "^8.1.0",
+    "@capacitor/cli": "^7.5.0",
+    "@capacitor/core": "^8.1.0",
+    "@capacitor/ios": "^8.1.0"
+  }
+}

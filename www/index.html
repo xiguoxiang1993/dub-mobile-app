@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Dub Editor</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    #webview-container {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: none;
+    }
+
+    .loading {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      z-index: 9999;
+    }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      color: white;
+      font-weight: bold;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: #666;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    .error {
+      color: #e74c3c;
+      font-size: 14px;
+      margin-top: 20px;
+      padding: 0 40px;
+      line-height: 1.6;
+    }
+
+    .retry-btn {
+      margin-top: 20px;
+      padding: 12px 30px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .retry-btn:active {
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="loading" id="loading">
+    <div class="logo">D</div>
+    <div class="spinner"></div>
+    <p class="loading-text">加载编辑器中...</p>
+  </div>
+  <iframe id="webview-container"></iframe>
+
+  <script type="module">
+    // 从 URL 参数获取编辑器地址
+    function getEditorUrl() {
+      const params = new URLSearchParams(window.location.search);
+
+      // 支持多种参数名
+      const url = params.get('url') || params.get('editor') || params.get('path');
+
+      if (url) {
+        return decodeURIComponent(url);
+      }
+
+      // 支持从 hash 中获取
+      const hash = window.location.hash.slice(1);
+      if (hash) {
+        try {
+          const hashParams = new URLSearchParams(hash);
+          const hashUrl = hashParams.get('url');
+          if (hashUrl) {
+            return decodeURIComponent(hashUrl);
+          }
+        } catch (e) {
+          console.error('解析 hash 参数失败:', e);
+        }
+      }
+
+      // 没有传递 URL，显示提示
+      return null;
+    }
+
+    // 显示错误信息
+    function showError(message) {
+      const loading = document.getElementById('loading');
+      loading.innerHTML = `
+        <div class="logo">D</div>
+        <p class="error">${message}</p>
+        <button class="retry-btn" onclick="location.reload()">重新加载</button>
+      `;
+    }
+
+    // 加载编辑器
+    function loadEditor() {
+      const iframe = document.getElementById('webview-container');
+      const loading = document.getElementById('loading');
+      const editorUrl = getEditorUrl();
+
+      // 如果没有传递 URL，显示提示
+      if (!editorUrl) {
+        loading.innerHTML = `
+          <div class="logo">D</div>
+          <p class="error">请从 Web 页面点击链接打开编辑器</p>
+          <p style="color: #999; font-size: 14px; margin-top: 10px;">
+            示例：dubeditor://open?url=https://your-domain.com/editor
+          </p>
+        `;
+        return;
+      }
+
+      console.log('加载编辑器:', editorUrl);
+
+      // 设置超时
+      const timeout = setTimeout(() => {
+        showError('加载超时，请检查网络连接');
+      }, 30000);
+
+      iframe.onload = () => {
+        clearTimeout(timeout);
+        loading.style.display = 'none';
+        iframe.style.display = 'block';
+        console.log('编辑器加载成功');
+      };
+
+      iframe.onerror = () => {
+        clearTimeout(timeout);
+        showError('加载失败，请检查网络连接或编辑器地址是否正确');
+        console.error('编辑器加载失败');
+      };
+
+      iframe.src = editorUrl;
+    }
+
+    // 监听 App URL 打开事件（Deep Link）
+    function setupDeepLink() {
+      // Capacitor App Plugin
+      if (window.Capacitor && window.Capacitor.Plugins.App) {
+        window.Capacitor.Plugins.App.addListener('appUrlOpen', (event) => {
+          console.log('App URL Open:', event.url);
+
+          // 解析 URL: dubeditor://open?url=xxx
+          try {
+            const url = new URL(event.url);
+            const editorUrl = url.searchParams.get('url');
+
+            if (editorUrl) {
+              const iframe = document.getElementById('webview-container');
+              iframe.src = decodeURIComponent(editorUrl);
+            }
+          } catch (e) {
+            console.error('解析 Deep Link 失败:', e);
+          }
+        });
+      }
+    }
+
+    // 页面加载完成后执行
+    window.addEventListener('DOMContentLoaded', () => {
+      setupDeepLink();
+      loadEditor();
+    });
+
+    // 监听网络状态变化
+    window.addEventListener('online', () => {
+      console.log('网络已连接');
+    });
+
+    window.addEventListener('offline', () => {
+      console.log('网络已断开');
+      showError('网络连接已断开，请检查网络设置');
+    });
+  </script>
+
+  <!-- Capacitor Core JS -->
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@capacitor/core@latest/dist/capacitor.js"></script>
+</body>
+</html>

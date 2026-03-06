@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web 端调用示例</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    .example {
+      background: #f5f5f5;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 10px 10px 10px 0;
+    }
+
+    button:hover {
+      background: #5568d3;
+    }
+
+    button:active {
+      opacity: 0.8;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      margin: 10px 0;
+    }
+
+    .tip {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .success {
+      background: #d4edda;
+      border-left: 4px solid #28a745;
+      padding: 15px;
+      margin: 20px 0;
+      display: none;
+    }
+
+    code {
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+    }
+
+    pre {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+
+    pre code {
+      background: none;
+      color: inherit;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚀 Dub Editor App 调用示例</h1>
+
+  <div class="tip">
+    <strong>提示：</strong>此页面演示如何从 Web 页面通过 Deep Link 打开 Dub Editor App。
+  </div>
+
+  <div class="example">
+    <h3>方式 1: 直接跳转（推荐）</h3>
+    <p>输入编辑器地址，点击按钮直接打开 App：</p>
+
+    <input
+      type="text"
+      id="editorUrl1"
+      placeholder="https://your-domain.com/editor?id=123&token=abc"
+      value="https://example.com/editor?id=123"
+    >
+
+    <button onclick="openApp1()">在 App 中打开</button>
+
+    <div class="success" id="success1">
+      ✅ 正在打开 App...
+    </div>
+  </div>
+
+  <div class="example">
+    <h3>方式 2: 优雅降级（检测是否安装）</h3>
+    <p>如果未安装 App，2 秒后提示下载：</p>
+
+    <input
+      type="text"
+      id="editorUrl2"
+      placeholder="https://your-domain.com/editor?id=123&token=abc"
+      value="https://example.com/editor?id=456"
+    >
+
+    <button onclick="openApp2()">在 App 中打开</button>
+
+    <div class="success" id="success2">
+      ✅ 正在打开 App...
+    </div>
+  </div>
+
+  <div class="example">
+    <h3>方式 3: 使用隐藏 iframe（更平滑）</h3>
+    <p>通过隐藏 iframe 尝试打开，不会跳转页面：</p>
+
+    <input
+      type="text"
+      id="editorUrl3"
+      placeholder="https://your-domain.com/editor?id=123&token=abc"
+      value="https://example.com/editor?id=789"
+    >
+
+    <button onclick="openApp3()">在 App 中打开</button>
+
+    <div class="success" id="success3">
+      ✅ 正在打开 App...
+    </div>
+  </div>
+
+  <h2>📝 代码示例</h2>
+
+  <h3>方式 1: 直接跳转</h3>
+  <pre><code>function openEditor(editorUrl) {
+  const deepLink = `dubeditor://open?url=${encodeURIComponent(editorUrl)}`;
+  window.location.href = deepLink;
+}</code></pre>
+
+  <h3>方式 2: 优雅降级</h3>
+  <pre><code>function openEditor(editorUrl) {
+  const deepLink = `dubeditor://open?url=${encodeURIComponent(editorUrl)}`;
+  const downloadUrl = 'https://your-domain.com/download';
+
+  window.location.href = deepLink;
+
+  // 2 秒后如果还在页面，说明没安装 App
+  setTimeout(() => {
+    if (confirm('检测到您未安装 Dub Editor App，是否前往下载？')) {
+      window.location.href = downloadUrl;
+    }
+  }, 2000);
+}</code></pre>
+
+  <h3>方式 3: 使用隐藏 iframe</h3>
+  <pre><code>function openEditor(editorUrl) {
+  const deepLink = `dubeditor://open?url=${encodeURIComponent(editorUrl)}`;
+  const downloadUrl = 'https://your-domain.com/download';
+
+  // 创建隐藏的 iframe
+  const iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  iframe.src = deepLink;
+  document.body.appendChild(iframe);
+
+  // 检测是否成功打开
+  const start = Date.now();
+
+  setTimeout(() => {
+    const elapsed = Date.now() - start;
+
+    // 如果时间差小于 2100ms，说明没有离开页面
+    if (elapsed < 2100) {
+      if (confirm('检测到您未安装 Dub Editor App，是否前往下载？')) {
+        window.location.href = downloadUrl;
+      }
+    }
+
+    // 清理 iframe
+    document.body.removeChild(iframe);
+  }, 2000);
+}</code></pre>
+
+  <h3>React 组件示例</h3>
+  <pre><code>import { useState } from 'react';
+
+function EditorButton({ editorUrl }) {
+  const [showDownload, setShowDownload] = useState(false);
+
+  const openEditor = () => {
+    const deepLink = `dubeditor://open?url=${encodeURIComponent(editorUrl)}`;
+    window.location.href = deepLink;
+
+    setTimeout(() => {
+      setShowDownload(true);
+    }, 2000);
+  };
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={openEditor}&gt;
+        在 App 中打开编辑器
+      &lt;/button&gt;
+
+      {showDownload && (
+        &lt;div className="download-tip"&gt;
+          &lt;p&gt;未检测到 App，&lt;a href="/download"&gt;点击下载&lt;/a&gt;&lt;/p&gt;
+        &lt;/div&gt;
+      )}
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+  <h2>🔗 URL Scheme 格式</h2>
+  <pre><code>dubeditor://open?url=https://your-domain.com/editor?id=123&token=abc</code></pre>
+
+  <p>参数说明：</p>
+  <ul>
+    <li><code>url</code> - 编辑器完整 URL（必需，需要 URL 编码）</li>
+  </ul>
+
+  <script>
+    // 方式 1: 直接跳转
+    function openApp1() {
+      const editorUrl = document.getElementById('editorUrl1').value;
+      if (!editorUrl) {
+        alert('请输入编辑器地址');
+        return;
+      }
+
+      const deepLink = `dubeditor://open?url=${encodeURIComponent(editorUrl)}`;
+      console.log('Deep Link:', deepLink);
+
+      document.getElementById('success1').style.display = 'block';
+
+      setTimeout(() => {
+        window.location.href = deepLink;
+      }, 500);
+    }
+
+    // 方式 2: 优雅降级
+    function openApp2() {
+      const editorUrl = document.getElementById('editorUrl2').value;
+      if (!editorUrl) {
+        alert('请输入编辑器地址');
+        return;
+      }
+
+      const deepLink = `dubeditor://open?url=${encodeURIComponent(editorUrl)}`;
+      const downloadUrl = 'https://your-domain.com/download';
+
+      document.getElementById('success2').style.display = 'block';
+
+      setTimeout(() => {
+        window.location.href = deepLink;
+
+        // 2 秒后如果还在页面，说明没安装 App
+        setTimeout(() => {
+          if (confirm('检测到您未安装 Dub Editor App，是否前往下载？')) {
+            window.location.href = downloadUrl;
+          }
+        }, 2000);
+      }, 500);
+    }
+
+    // 方式 3: 使用隐藏 iframe
+    function openApp3() {
+      const editorUrl = document.getElementById('editorUrl3').value;
+      if (!editorUrl) {
+        alert('请输入编辑器地址');
+        return;
+      }
+
+      const deepLink = `dubeditor://open?url=${encodeURIComponent(editorUrl)}`;
+      const downloadUrl = 'https://your-domain.com/download';
+
+      document.getElementById('success3').style.display = 'block';
+
+      // 创建隐藏的 iframe
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = deepLink;
+      document.body.appendChild(iframe);
+
+      // 检测是否成功打开
+      const start = Date.now();
+
+      setTimeout(() => {
+        const elapsed = Date.now() - start;
+
+        // 如果时间差小于 2100ms，说明没有离开页面
+        if (elapsed < 2100) {
+          if (confirm('检测到您未安装 Dub Editor App，是否前往下载？')) {
+            window.location.href = downloadUrl;
+          }
+        }
+
+        // 清理 iframe
+        document.body.removeChild(iframe);
+        document.getElementById('success3').style.display = 'none';
+      }, 2000);
+    }
+  </script>
+</body>
+</html>

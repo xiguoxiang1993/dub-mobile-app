@@ -1,0 +1,48 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Capacitor
+.capacitor/
+capacitor.config.json
+
+# Android
+android/app/build/
+android/app/release/
+android/app/debug/
+android/.gradle/
+android/build/
+android/local.properties
+android/.idea/
+android/*.iml
+*.apk
+*.aab
+
+# iOS
+ios/App/Pods/
+ios/App/Podfile.lock
+ios/App/build/
+ios/App/*.xcworkspace/xcuserdata/
+ios/App/*.xcodeproj/xcuserdata/
+ios/App/App.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+*.ipa
+*.dSYM.zip
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temp
+tmp/
+temp/
