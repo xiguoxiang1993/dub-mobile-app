@@ -19,13 +19,6 @@
       background: #ffffff;
     }
 
-    #webview-container {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: none;
-    }
-
     .loading {
       position: fixed;
       top: 50%;
@@ -85,36 +78,18 @@
     <div class="spinner"></div>
     <p class="loading-text">等待打开...</p>
   </div>
-  <iframe id="webview-container"></iframe>
 
   <!-- Capacitor Core JS -->
   <script src="https://cdn.jsdelivr.net/npm/@capacitor/core@latest/dist/capacitor.js"></script>
 
   <script>
-    const iframe = document.getElementById('webview-container');
     const loading = document.getElementById('loading');
 
-    // 加载 URL
+    // 直接跳转到目标 URL
     function loadUrl(url) {
-      console.log('加载 URL:', url);
-
-      loading.querySelector('.loading-text').textContent = '加载中...';
-
-      iframe.onload = () => {
-        console.log('加载成功');
-        loading.style.display = 'none';
-        iframe.style.display = 'block';
-      };
-
-      iframe.onerror = () => {
-        console.error('加载失败');
-        loading.innerHTML = `
-          <div class="logo">D</div>
-          <p class="error">加载失败，请检查网络连接</p>
-        `;
-      };
-
-      iframe.src = url;
+      console.log('跳转到:', url);
+      // 直接替换当前页面
+      window.location.href = url;
     }
 
     // 等待 Capacitor 加载
@@ -124,7 +99,7 @@
       if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
         const App = window.Capacitor.Plugins.App;
 
-        // 监听 Deep Link
+        // 监听 Deep Link（热启动）
         App.addListener('appUrlOpen', (data) => {
           console.log('接收到 Deep Link:', data.url);
 
@@ -140,7 +115,7 @@
           }
         });
 
-        // 检查启动 URL
+        // 检查启动 URL（冷启动）
         App.getLaunchUrl().then(result => {
           if (result && result.url) {
             console.log('启动 URL:', result.url);
@@ -174,7 +149,7 @@
       }
     }, false);
 
-    // 如果 deviceready 没触发，使用 DOMContentLoaded
+    // 如果 deviceready 没触发，使用备用方案
     setTimeout(() => {
       if (loading.style.display !== 'none') {
         document.dispatchEvent(new Event('deviceready'));
