@@ -106,8 +106,17 @@
   <iframe id="webview-container"></iframe>
 
   <script type="module">
+    // 全局变量存储编辑器 URL
+    let editorUrlFromDeepLink = null;
+
     // 从 URL 参数获取编辑器地址
     function getEditorUrl() {
+      // 优先使用 Deep Link 传递的 URL
+      if (editorUrlFromDeepLink) {
+        console.log('使用 Deep Link URL:', editorUrlFromDeepLink);
+        return editorUrlFromDeepLink;
+      }
+
       const params = new URLSearchParams(window.location.search);
 
       // 支持多种参数名
@@ -165,6 +174,14 @@
 
       console.log('加载编辑器:', editorUrl);
 
+      // 显示加载状态
+      loading.innerHTML = `
+        <div class="logo">D</div>
+        <div class="spinner"></div>
+        <p class="loading-text">加载编辑器中...</p>
+      `;
+      loading.style.display = 'block';
+
       // 设置超时
       const timeout = setTimeout(() => {
         showError('加载超时，请检查网络连接');
@@ -190,29 +207,67 @@
     function setupDeepLink() {
       // Capacitor App Plugin
       if (window.Capacitor && window.Capacitor.Plugins.App) {
+        console.log('Capacitor App Plugin 已加载');
+
         window.Capacitor.Plugins.App.addListener('appUrlOpen', (event) => {
-          console.log('App URL Open:', event.url);
+          console.log('App URL Open 事件触发:', event.url);
 
           // 解析 URL: dubeditor://open?url=xxx
           try {
             const url = new URL(event.url);
-            const editorUrl = url.searchParams.get('url');
+            const targetUrl = url.searchParams.get('url');
 
-            if (editorUrl) {
-              const iframe = document.getElementById('webview-container');
-              iframe.src = decodeURIComponent(editorUrl);
+            console.log('解析到的目标 URL:', targetUrl);
+
+            if (targetUrl) {
+              const decodedUrl = decodeURIComponent(targetUrl);
+              console.log('解码后的 URL:', decodedUrl);
+
+              editorUrlFromDeepLink = decodedUrl;
+
+              // 重新加载编辑器
+              loadEditor();
+            } else {
+              console.error('未找到 url 参数');
             }
           } catch (e) {
             console.error('解析 Deep Link 失败:', e);
           }
         });
+
+        // 检查启动时的 URL（冷启动）
+        window.Capacitor.Plugins.App.getLaunchUrl().then(result => {
+          if (result && result.url) {
+            console.log('App 启动 URL:', result.url);
+            try {
+              const url = new URL(result.url);
+              const targetUrl = url.searchParams.get('url');
+              if (targetUrl) {
+                const decodedUrl = decodeURIComponent(targetUrl);
+                console.log('启动时的目标 URL:', decodedUrl);
+                editorUrlFromDeepLink = decodedUrl;
+              }
+            } catch (e) {
+              console.error('解析启动 URL 失败:', e);
+            }
+          }
+        }).catch(err => {
+          console.error('获取启动 URL 失败:', err);
+        });
+      } else {
+        console.warn('Capacitor App Plugin 未加载');
       }
     }
 
     // 页面加载完成后执行
     window.addEventListener('DOMContentLoaded', () => {
+      console.log('DOMContentLoaded 事件触发');
       setupDeepLink();
-      loadEditor();
+
+      // 延迟加载，等待 Capacitor 初始化
+      setTimeout(() => {
+        loadEditor();
+      }, 500);
     });
 
     // 监听网络状态变化
