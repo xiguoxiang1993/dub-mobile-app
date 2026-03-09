@@ -90,16 +90,44 @@
     // 直接跳转到目标 URL
     function loadUrl(url) {
       console.log('跳转到:', url);
-      // 直接替换当前页面
       window.location.href = url;
     }
 
-    // 等待 Capacitor 加载
-    document.addEventListener('deviceready', () => {
-      console.log('Capacitor 已就绪');
+    // 显示错误信息
+    function showError(message) {
+      loading.innerHTML = `
+        <div class="logo">D</div>
+        <p class="error">${message}</p>
+      `;
+    }
 
-      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
-        const App = window.Capacitor.Plugins.App;
+    // 初始化 Capacitor
+    async function initCapacitor() {
+      console.log('开始初始化 Capacitor');
+
+      // 等待 Capacitor 加载
+      let retries = 0;
+      while (!window.Capacitor && retries < 20) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retries++;
+      }
+
+      if (!window.Capacitor) {
+        console.error('Capacitor 未加载');
+        showError('应用初始化失败，请重试');
+        return;
+      }
+
+      console.log('Capacitor 已加载');
+
+      try {
+        const { App } = window.Capacitor.Plugins;
+
+        if (!App) {
+          console.error('App 插件未找到');
+          showError('应用插件加载失败');
+          return;
+        }
 
         // 监听 Deep Link（热启动）
         App.addListener('appUrlOpen', (data) => {
@@ -113,50 +141,46 @@
               loadUrl(decodeURIComponent(targetUrl));
             }
           } catch (e) {
-            console.error('解析失败:', e);
+            console.error('解析 Deep Link 失败:', e);
+            showError('链接解析失败');
           }
         });
 
         // 检查启动 URL（冷启动）
-        App.getLaunchUrl().then(result => {
-          if (result && result.url) {
-            console.log('启动 URL:', result.url);
+        const result = await App.getLaunchUrl();
+        console.log('getLaunchUrl 结果:', result);
 
-            try {
-              const url = new URL(result.url);
-              const targetUrl = url.searchParams.get('url');
+        if (result && result.url) {
+          console.log('启动 URL:', result.url);
 
-              if (targetUrl) {
-                loadUrl(decodeURIComponent(targetUrl));
-              } else {
-                loading.innerHTML = `
-                  <div class="logo">D</div>
-                  <p class="error">请从 Web 页面点击链接打开</p>
-                `;
-              }
-            } catch (e) {
-              console.error('解析启动 URL 失败:', e);
-              loading.innerHTML = `
-                <div class="logo">D</div>
-                <p class="error">请从 Web 页面点击链接打开</p>
-              `;
+          try {
+            const url = new URL(result.url);
+            const targetUrl = url.searchParams.get('url');
+
+            if (targetUrl) {
+              loadUrl(decodeURIComponent(targetUrl));
+            } else {
+              showError('请从 Web 页面点击链接打开');
             }
-          } else {
-            loading.innerHTML = `
-              <div class="logo">D</div>
-              <p class="error">请从 Web 页面点击链接打开</p>
-            `;
+          } catch (e) {
+            console.error('解析启动 URL 失败:', e);
+            showError('链接格式错误');
           }
-        });
+        } else {
+          showError('请从 Web 页面点击链接打开');
+        }
+      } catch (e) {
+        console.error('初始化失败:', e);
+        showError('应用初始化失败: ' + e.message);
       }
-    }, false);
+    }
 
-    // 如果 deviceready 没触发，使用备用方案
-    setTimeout(() => {
-      if (loading.style.display !== 'none') {
-        document.dispatchEvent(new Event('deviceready'));
-      }
-    }, 1000);
+    // 页面加载完成后初始化
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initCapacitor);
+    } else {
+      initCapacitor();
+    }
   </script>
 </body>
 </html>
