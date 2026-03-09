@@ -90,6 +90,7 @@
     // 在当前 WebView 中加载目标 URL
     function loadUrl(url) {
       console.log('在 WebView 中加载:', url);
+      alert('准备加载 URL: ' + url);
       // 使用 replace 替换当前页面，不会打开外部浏览器
       window.location.replace(url);
     }
@@ -139,15 +140,18 @@
         // 监听 Deep Link（热启动）
         AppPlugin.addListener('appUrlOpen', (data) => {
           console.log('接收到 Deep Link:', data.url);
+          alert('接收到 Deep Link: ' + data.url);
 
           try {
             // 支持 dubeditor://open?url=xxx 或 dubeditor://?url=xxx 格式
             const match = data.url.match(/url=([^&]+)/);
             console.log('正则匹配结果:', match);
+            alert('正则匹配结果: ' + (match ? match[1] : '未匹配'));
 
             if (match && match[1]) {
               const targetUrl = decodeURIComponent(match[1]);
               console.log('解码后的目标 URL:', targetUrl);
+              alert('解码后的目标 URL: ' + targetUrl);
               loadUrl(targetUrl);
             } else {
               showError('未找到目标 URL 参数，原始 URL: ' + data.url);
@@ -161,18 +165,22 @@
         // 检查启动 URL（冷启动）
         const result = await AppPlugin.getLaunchUrl();
         console.log('getLaunchUrl 结果:', result);
+        alert('getLaunchUrl 结果: ' + JSON.stringify(result));
 
         if (result && result.url) {
           console.log('启动 URL:', result.url);
+          alert('启动 URL: ' + result.url);
 
           try {
             // 支持 dubeditor://open?url=xxx 或 dubeditor://?url=xxx 格式
             const match = result.url.match(/url=([^&]+)/);
             console.log('正则匹配结果:', match);
+            alert('正则匹配结果: ' + (match ? match[1] : '未匹配'));
 
             if (match && match[1]) {
               const targetUrl = decodeURIComponent(match[1]);
               console.log('解码后的目标 URL:', targetUrl);
+              alert('解码后的目标 URL: ' + targetUrl);
               loadUrl(targetUrl);
             } else {
               showError('请从 Web 页面点击链接打开');
