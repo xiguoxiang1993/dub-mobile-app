@@ -105,6 +105,7 @@
 
     // 初始化 Capacitor
     async function initCapacitor() {
+      alert('开始初始化 Capacitor');
       console.log('开始初始化 Capacitor');
 
       // 等待 Capacitor 加载
@@ -115,11 +116,13 @@
       }
 
       if (!window.Capacitor) {
+        alert('Capacitor 未加载');
         console.error('Capacitor 未加载');
         showError('应用初始化失败，请重试');
         return;
       }
 
+      alert('Capacitor 已加载');
       console.log('Capacitor 已加载', window.Capacitor);
 
       try {
@@ -130,11 +133,13 @@
         const AppPlugin = App || window.CapacitorApp;
 
         if (!AppPlugin) {
+          alert('App 插件未找到');
           console.error('App 插件未找到，Capacitor:', window.Capacitor);
           showError('应用插件加载失败，请检查配置');
           return;
         }
 
+        alert('App 插件已加载');
         console.log('App 插件已加载');
 
         // 监听 Deep Link（热启动）
