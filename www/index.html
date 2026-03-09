@@ -79,8 +79,10 @@
     <p class="loading-text">等待打开...</p>
   </div>
 
-  <!-- Capacitor Core JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@capacitor/core@latest/dist/capacitor.js"></script>
+  <script>
+    // Capacitor 会在原生应用中自动注入，无需手动加载
+    // 如果在浏览器中测试，可以使用 npx cap serve
+  </script>
 
   <script>
     const loading = document.getElementById('loading');
