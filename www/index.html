@@ -118,19 +118,25 @@
         return;
       }
 
-      console.log('Capacitor 已加载');
+      console.log('Capacitor 已加载', window.Capacitor);
 
       try {
-        const { App } = window.Capacitor.Plugins;
+        // Capacitor 3+ 使用 registerPlugin 方式
+        const { App } = window.Capacitor.Plugins || {};
 
-        if (!App) {
-          console.error('App 插件未找到');
-          showError('应用插件加载失败');
+        // 如果 Plugins 不存在，尝试直接从 Capacitor 获取
+        const AppPlugin = App || window.CapacitorApp;
+
+        if (!AppPlugin) {
+          console.error('App 插件未找到，Capacitor:', window.Capacitor);
+          showError('应用插件加载失败，请检查配置');
           return;
         }
 
+        console.log('App 插件已加载');
+
         // 监听 Deep Link（热启动）
-        App.addListener('appUrlOpen', (data) => {
+        AppPlugin.addListener('appUrlOpen', (data) => {
           console.log('接收到 Deep Link:', data.url);
 
           try {
@@ -147,7 +153,7 @@
         });
 
         // 检查启动 URL（冷启动）
-        const result = await App.getLaunchUrl();
+        const result = await AppPlugin.getLaunchUrl();
         console.log('getLaunchUrl 结果:', result);
 
         if (result && result.url) {
