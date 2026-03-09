@@ -10,7 +10,9 @@ const config: CapacitorConfig = {
     // cleartext: true,
 
     // 生产模式：注释掉上面的 url，使用打包后的静态文件
-    androidScheme: 'https'
+    androidScheme: 'https',
+    // 允许所有导航
+    allowNavigation: ['*']
   },
   ios: {
     contentInset: 'never',
