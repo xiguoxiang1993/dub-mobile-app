@@ -141,8 +141,8 @@
           console.log('接收到 Deep Link:', data.url);
 
           try {
-            // 直接从 dubeditor://?url=xxx 中提取 url 参数
-            const match = data.url.match(/[?&]url=([^&]+)/);
+            // 支持 dubeditor://open?url=xxx 或 dubeditor://?url=xxx 格式
+            const match = data.url.match(/url=([^&]+)/);
             console.log('正则匹配结果:', match);
 
             if (match && match[1]) {
@@ -166,8 +166,8 @@
           console.log('启动 URL:', result.url);
 
           try {
-            // 直接从 dubeditor://?url=xxx 中提取 url 参数
-            const match = result.url.match(/[?&]url=([^&]+)/);
+            // 支持 dubeditor://open?url=xxx 或 dubeditor://?url=xxx 格式
+            const match = result.url.match(/url=([^&]+)/);
             console.log('正则匹配结果:', match);
 
             if (match && match[1]) {
