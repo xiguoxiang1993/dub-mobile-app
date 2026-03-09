@@ -1,24 +1,25 @@
 package com.dub.editor;
 
 import android.os.Bundle;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import com.getcapacitor.BridgeActivity;
+import com.getcapacitor.Bridge;
 
 public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
 
-        // 设置 WebViewClient，防止链接在外部浏览器打开
-        WebView webView = getBridge().getWebView();
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                // 在 WebView 内部加载所有 URL
-                view.loadUrl(url);
-                return true;
-            }
-        });
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // 配置 Bridge，允许所有导航
+        Bridge bridge = getBridge();
+        if (bridge != null) {
+            bridge.getConfig().setAllowNavigation(new String[]{"*"});
+        }
     }
 }
