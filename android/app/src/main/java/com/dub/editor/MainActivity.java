@@ -56,6 +56,15 @@ public class MainActivity extends Activity {
 
             // 从 dubeditor://open?url=xxx 中提取 url 参数
             String targetUrl = data.getQueryParameter("url");
+
+            // 如果 URI 有 fragment，将其附加到目标 URL
+            String fragment = data.getFragment();
+            if (fragment != null && !fragment.isEmpty()) {
+                if (targetUrl != null) {
+                    targetUrl = targetUrl + "#" + fragment;
+                }
+            }
+
             android.util.Log.d("MainActivity", "Extracted URL: " + targetUrl);
 
             if (targetUrl != null && !targetUrl.isEmpty()) {
