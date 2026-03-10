@@ -48,12 +48,23 @@ public class MainActivity extends Activity {
 
     private void handleIntent(Intent intent) {
         Uri data = intent.getData();
+        android.util.Log.d("MainActivity", "handleIntent called, data: " + data);
+
         if (data != null) {
+            android.util.Log.d("MainActivity", "URI: " + data.toString());
+
             // 从 dubeditor://open?url=xxx 中提取 url 参数
             String targetUrl = data.getQueryParameter("url");
+            android.util.Log.d("MainActivity", "Extracted URL: " + targetUrl);
+
             if (targetUrl != null && !targetUrl.isEmpty()) {
+                android.util.Log.d("MainActivity", "Loading URL: " + targetUrl);
                 webView.loadUrl(targetUrl);
+            } else {
+                android.util.Log.e("MainActivity", "No URL parameter found");
             }
+        } else {
+            android.util.Log.e("MainActivity", "Intent data is null");
         }
     }
 
