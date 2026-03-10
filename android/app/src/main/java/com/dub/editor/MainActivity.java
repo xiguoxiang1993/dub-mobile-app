@@ -48,11 +48,26 @@ public class MainActivity extends Activity {
     }
 
     private void handleIntent(Intent intent) {
+        android.util.Log.d("MainActivity", "=== handleIntent called ===");
+        android.util.Log.d("MainActivity", "Intent action: " + intent.getAction());
+        android.util.Log.d("MainActivity", "Intent data: " + intent.getData());
+        android.util.Log.d("MainActivity", "Intent dataString: " + intent.getDataString());
+
+        // 打印所有 extras
+        if (intent.getExtras() != null) {
+            for (String key : intent.getExtras().keySet()) {
+                android.util.Log.d("MainActivity", "Extra: " + key + " = " + intent.getExtras().get(key));
+            }
+        }
+
         Uri data = intent.getData();
-        android.util.Log.d("MainActivity", "handleIntent called, data: " + data);
 
         if (data != null) {
-            android.util.Log.d("MainActivity", "URI: " + data.toString());
+            android.util.Log.d("MainActivity", "URI scheme: " + data.getScheme());
+            android.util.Log.d("MainActivity", "URI host: " + data.getHost());
+            android.util.Log.d("MainActivity", "URI path: " + data.getPath());
+            android.util.Log.d("MainActivity", "URI query: " + data.getQuery());
+            android.util.Log.d("MainActivity", "URI fragment: " + data.getFragment());
 
             // 从 dubeditor://open?url=xxx 中提取 url 参数
             String targetUrl = data.getQueryParameter("url");
