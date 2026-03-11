@@ -44,9 +44,6 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
 
-    // GeckoView - Firefox 浏览器内核（使用 LTS 稳定版本）
-    implementation "org.mozilla.geckoview:geckoview:120.0.1"
-
     // 排除旧版本的 Kotlin 标准库，避免重复类冲突
     configurations.all {
         exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'

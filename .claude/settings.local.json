@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(adb:*)",
+      "Bash(npm install:*)",
+      "Bash(./gradlew assembleDebug:*)",
+      "WebSearch",
+      "WebFetch(domain:mvnrepository.com)"
+    ]
+  }
+}
