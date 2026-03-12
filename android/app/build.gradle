@@ -37,12 +37,18 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
-    implementation "androidx.webkit:webkit:$androidxWebkitVersion"
+    // implementation "androidx.webkit:webkit:$androidxWebkitVersion"
     implementation project(':capacitor-android')
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
+
+    // GeckoView - 使用 beta 版本（更容易获取）
+    // implementation "org.mozilla.geckoview:geckoview-beta:125.0.20240415091630"
+
+    // GeckoView - Maven Central 第三方镜像（国内可访问）
+    implementation 'io.github.mhqz:geckoview-default-omni-arm64-v8a:107.0.20221005094233'
 
     // 排除旧版本的 Kotlin 标准库，避免重复类冲突
     configurations.all {
