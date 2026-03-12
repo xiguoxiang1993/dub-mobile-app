@@ -48,7 +48,7 @@ dependencies {
     // implementation "org.mozilla.geckoview:geckoview-beta:125.0.20240415091630"
 
     // GeckoView - Maven Central 第三方镜像（国内可访问）
-    implementation 'io.github.mhqz:geckoview-default-omni-arm64-v8a:107.0.20221005094233'
+    implementation 'io.github.mhqz:geckoview-ceno-omni-arm64-v8a:107.0.20221005094233'
 
     // 排除旧版本的 Kotlin 标准库，避免重复类冲突
     configurations.all {
