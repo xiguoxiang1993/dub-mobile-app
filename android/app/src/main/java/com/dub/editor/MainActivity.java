@@ -15,6 +15,7 @@ public class MainActivity extends Activity {
     private GeckoView geckoView;
     private GeckoSession geckoSession;
     private static GeckoRuntime sRuntime;
+    private boolean canGoBack = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +32,20 @@ public class MainActivity extends Activity {
 
         // 创建 GeckoSession
         geckoSession = new GeckoSession();
+
+        // 设置导航代理以跟踪返回状态
+        geckoSession.setNavigationDelegate(new GeckoSession.NavigationDelegate() {
+            @Override
+            public void onCanGoBack(GeckoSession session, boolean canGoBack) {
+                MainActivity.this.canGoBack = canGoBack;
+            }
+
+            @Override
+            public void onCanGoForward(GeckoSession session, boolean canGoForward) {
+                // 不需要处理前进
+            }
+        });
+
         geckoSession.open(sRuntime);
         geckoView.setSession(geckoSession);
 
@@ -66,7 +81,7 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (geckoSession != null && geckoSession.canGoBack()) {
+        if (geckoSession != null && canGoBack) {
             geckoSession.goBack();
         } else {
             super.onBackPressed();
