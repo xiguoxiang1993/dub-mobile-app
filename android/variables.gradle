@@ -1,5 +1,5 @@
 ext {
-    minSdkVersion = 31  // Android 12，确保 Chrome 96+ WebView
+    minSdkVersion = 24  // 恢复到 Android 7.0，兼容你的设备
     compileSdkVersion = 35
     targetSdkVersion = 34
     androidxActivityVersion = '1.9.2'
